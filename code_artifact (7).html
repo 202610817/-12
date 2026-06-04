@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>네온 마법 장풍 대결 (디벗 1대1)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Noto+Sans+KR:wght@500;800&display=swap');
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            overflow: hidden;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 캐릭터 카드 선택 효과 */
+        .char-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .char-card:hover {
+            transform: translateY(-4px);
+        }
+
+        /* 네온 테마 광원 효과 */
+        .neon-glow-red {
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+            text-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+        }
+        .neon-glow-blue {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+            text-shadow: 0 0 8px rgba(59, 130, 246, 0.8);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-white h-screen w-screen flex flex-col justify-between items-center relative overflow-hidden">
+
+    <!-- 캐릭터 선택 & 대기실 화면 -->
+    <div id="lobby-screen" class="absolute inset-0 bg-slate-950/98 z-50 flex flex-col items-center justify-start p-6 overflow-y-auto">
+        <div class="max-w-2xl w-full text-center mt-4">
+            <span class="text-indigo-400 font-orbitron tracking-widest text-xs">NEON MAGIC DUEL</span>
+            <h1 class="text-3xl md:text-5xl font-black mt-1 mb-6 bg-clip-text text-transparent bg-gradient-to-r from-red-500 via-purple-500 to-blue-500">
+                마법 장풍 대전 1v1
+            </h1>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- 플레이어 1 선택 영역 (BLUE) -->
+                <div class="bg-slate-900/80 border-2 border-blue-600/40 rounded-2xl p-4 flex flex-col items-center">
+                    <h2 class="text-lg font-bold text-blue-400 mb-3"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 플레이어 1 (왼쪽 BLUE)</h2>
+                    <div class="grid grid-cols-3 gap-2 w-full mb-3">
+                        <button onclick="selectClass(1, 'FIRE')" id="p1-btn-FIRE" class="char-card p-2 rounded-xl bg-slate-950 border border-slate-800 text-xs font-bold hover:border-red-500">
+                            <span class="text-red-500 block text-lg mb-1"><i class="fa-solid fa-fire"></i></span> 불꽃
+                        </button>
+                        <button onclick="selectClass(1, 'ICE')" id="p1-btn-ICE" class="char-card p-2 rounded-xl bg-slate-950 border border-slate-800 text-xs font-bold hover:border-sky-400">
+                            <span class="text-sky-400 block text-lg mb-1"><i class="fa-solid fa-snowflake"></i></span> 얼음
+                        </button>
+                        <button onclick="selectClass(1, 'LIGHTNING')" id="p1-btn-LIGHTNING" class="char-card p-2 rounded-xl bg-slate-950 border border-slate-800 text-xs font-bold hover:border-yellow-400">
+                            <span class="text-yellow-400 block text-lg mb-1"><i class="fa-solid fa-bolt"></i></span> 번개
+                        </button>
+                    </div>
+                    <div class="bg-slate-950/60 p-3 rounded-lg text-left text-xs w-full min-h-[90px] text-slate-300 border border-slate-800/80">
+                        <div class="font-bold text-blue-300 mb-1" id="p1-char-name">불꽃 마법사</div>
+                        <p id="p1-char-desc" class="text-slate-400 leading-relaxed">이동: [A, D] | 점프: [W] | 공격/공중공격: [S] 키</p>
+                    </div>
+                </div>
+
+                <!-- 플레이어 2 선택 영역 (RED) -->
+                <div class="bg-slate-900/80 border-2 border-red-600/40 rounded-2xl p-4 flex flex-col items-center">
+                    <h2 class="text-lg font-bold text-red-400 mb-3"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 플레이어 2 (오른쪽 RED)</h2>
+                    <div class="grid grid-cols-3 gap-2 w-full mb-3">
+                        <button onclick="selectClass(2, 'FIRE')" id="p2-btn-FIRE" class="char-card p-2 rounded-xl bg-slate-950 border border-slate-800 text-xs font-bold hover:border-red-500">
+                            <span class="text-red-500 block text-lg mb-1"><i class="fa-solid fa-fire"></i></span> 불꽃
+                        </button>
+                        <button onclick="selectClass(2, 'ICE')" id="p2-btn-ICE" class="char-card p-2 rounded-xl bg-slate-950 border border-slate-800 text-xs font-bold hover:border-sky-400">
+                            <span class="text-sky-400 block text-lg mb-1"><i class="fa-solid fa-snowflake"></i></span> 얼음
+                        </button>
+                        <button onclick="selectClass(2, 'LIGHTNING')" id="p2-btn-LIGHTNING" class="char-card p-2 rounded-xl bg-slate-950 border border-slate-800 text-xs font-bold hover:border-yellow-400">
+                            <span class="text-yellow-400 block text-lg mb-1"><i class="fa-solid fa-bolt"></i></span> 번개
+                        </button>
+                    </div>
+                    <div class="bg-slate-950/60 p-3 rounded-lg text-left text-xs w-full min-h-[90px] text-slate-300 border border-slate-800/80">
+                        <div class="font-bold text-red-300 mb-1" id="p2-char-name">번개 마법사</div>
+                        <p id="p2-char-desc" class="text-slate-400 leading-relaxed">이동: [J, L] | 점프: [I] | 공격/공중공격: [K] 키</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 세팅 및 시작 -->
+            <div class="max-w-md mx-auto bg-slate-900/60 p-5 rounded-2xl border border-slate-850 mb-6 flex flex-col space-y-3">
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-slate-400">목표 기준 체력</span>
+                    <div class="flex space-x-2">
+                        <button onclick="setTargetHP(100)" id="hp-btn-100" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-xs font-bold">100 HP</button>
+                        <button onclick="setTargetHP(150)" id="hp-btn-150" class="px-3 py-1.5 rounded-lg bg-slate-800 text-xs hover:bg-slate-700">150 HP</button>
+                        <button onclick="setTargetHP(200)" id="hp-btn-200" class="px-3 py-1.5 rounded-lg bg-slate-800 text-xs hover:bg-slate-700">200 HP</button>
+                    </div>
+                </div>
+                <div class="text-left text-slate-300 text-xs space-y-1.5 bg-slate-950/55 p-3 rounded-xl border border-slate-800">
+                    <p class="font-bold text-amber-400"><i class="fa-solid fa-star mr-1"></i> 심리전 점프 대결 규칙:</p>
+                    <p>1. 지상 장풍은 타이밍에 맞춰 **위로 점프하면 회피**할 수 있습니다.</p>
+                    <p>2. ❄️ <strong>얼음 마법사 특수 공격</strong>: 지상 공격 시 상대방 발밑에서 얼음 가시가 솟아오릅니다! 타이밍에 맞게 <strong>점프</strong>로 피해내세요!</p>
+                    <p>3. 공중에서 쏜 장풍은 항상 **하늘 높은 곳을 날아갑니다.** 바닥에 있으면 무사하지만, 같이 뛰면 피격됩니다!</p>
+                    <p>4. 🛡️ <strong>기절 면역 장치 도입</strong>: 기절에서 깨어나면 **2.5초간 기절 면역**이 부여되어 연속 기절이 방지됩니다!</p>
+                </div>
+            </div>
+
+            <button onclick="startGame()" class="px-12 py-4 rounded-2xl bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-500 hover:to-blue-500 text-white font-bold text-xl shadow-lg shadow-indigo-500/30 transition-all transform active:scale-95">
+                대결 시작하기 <i class="fa-solid fa-bolt ml-1 text-yellow-400"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- 스코어 및 체력 인터페이스 (왼쪽 BLUE vs 오른쪽 RED) -->
+    <div class="w-full bg-slate-900/90 border-b border-slate-800 py-3.5 px-6 flex justify-between items-center z-10">
+        <!-- 왼쪽 BLUE 정보 -->
+        <div class="flex items-center space-x-3">
+            <span class="w-3 h-3 rounded-full bg-blue-500 neon-glow-blue" id="p1-indicator"></span>
+            <div class="flex flex-col text-left">
+                <span class="text-xs text-blue-400 font-bold" id="p1-panel-class">P1 BLUE</span>
+                <div class="flex items-center space-x-2 mt-1">
+                    <div class="w-28 bg-slate-950 border border-slate-800 rounded-full h-2.5 overflow-hidden">
+                        <div id="p1-hp-bar" class="bg-blue-500 h-full" style="width: 100%"></div>
+                    </div>
+                    <span class="text-sm font-orbitron font-extrabold text-blue-400" id="p1-hp-text">100</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-lg font-orbitron font-black text-slate-500">VS</div>
+
+        <!-- 오른쪽 RED 정보 -->
+        <div class="flex items-center space-x-3 flex-row-reverse text-right">
+            <span class="w-3 h-3 rounded-full bg-red-500 neon-glow-red" id="p2-indicator"></span>
+            <div class="flex flex-col text-right items-end">
+                <span class="text-xs text-red-400 font-bold" id="p2-panel-class">P2 RED</span>
+                <div class="flex items-center space-x-2 mt-1 flex-row-reverse">
+                    <div class="w-28 bg-slate-950 border border-slate-800 rounded-full h-2.5 overflow-hidden ml-2">
+                        <div id="p2-hp-bar" class="bg-red-500 h-full" style="width: 100%"></div>
+                    </div>
+                    <span class="text-sm font-orbitron font-extrabold text-red-400" id="p2-hp-text">100</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 메인 게임 캔버스 영역 (가로형 아레나 배치) -->
+    <div class="flex-1 w-full relative flex items-center justify-center bg-slate-950">
+        <canvas id="game-canvas" class="max-w-full max-h-full aspect-[16/9] bg-slate-950 block border-y-2 border-slate-900"></canvas>
+        
+        <!-- 일시정지 버튼 -->
+        <button onclick="togglePause()" class="absolute right-4 top-4 bg-slate-900/80 hover:bg-slate-800 text-white w-10 h-10 rounded-full flex items-center justify-center border border-slate-700 active:scale-90 transition-all z-20">
+            <i class="fa-solid fa-pause" id="pause-icon"></i>
+        </button>
+    </div>
+
+    <!-- 일시정지 레이어 -->
+    <div id="pause-screen" class="absolute inset-0 bg-slate-950/80 z-40 hidden flex-col items-center justify-center p-6">
+        <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 text-center max-w-xs w-full shadow-2xl">
+            <h3 class="text-2xl font-bold mb-4"><i class="fa-solid fa-circle-pause text-amber-500 mr-1"></i> 결투 일시정지</h3>
+            <div class="space-y-2">
+                <button onclick="togglePause()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all">대결 재개</button>
+                <button onclick="exitToLobby()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition-all">로비로 이동</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 결과 대기 모달 -->
+    <div id="end-screen" class="absolute inset-0 bg-slate-950/95 z-50 flex flex-col items-center justify-center p-6 hidden">
+        <div class="max-w-sm w-full bg-slate-900 border-4 rounded-3xl p-8 text-center shadow-2xl" id="end-modal">
+            <div class="text-5xl mb-4" id="winner-icon">🏆</div>
+            <h2 class="text-3xl font-black mb-1" id="winner-title">BLUE WIN!</h2>
+            <p class="text-slate-400 text-sm mb-6" id="winner-desc">축하합니다! 완벽한 대결이었습니다.</p>
+            
+            <!-- 최종 HP 요약 스코어보드 -->
+            <div class="bg-slate-950/50 py-3 px-6 rounded-xl border border-slate-800 mb-6 flex justify-around items-center">
+                <div class="text-center">
+                    <span class="text-xs text-blue-400 block mb-1">P1 BLUE HP</span>
+                    <span class="text-2xl font-orbitron font-bold text-blue-500" id="final-p1-score">0</span>
+                </div>
+                <div class="text-slate-600 text-xl font-bold">:</div>
+                <div class="text-center">
+                    <span class="text-xs text-red-400 block mb-1">P2 RED HP</span>
+                    <span class="text-2xl font-orbitron font-bold text-red-500" id="final-p2-score">0</span>
+                </div>
+            </div>
+            
+            <button onclick="restartGame()" class="w-full py-3.5 bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg transition-colors mb-2">
+                다시 대결하기!
+            </button>
+            <button onclick="exitToLobby()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-400 font-bold rounded-xl transition-colors">
+                클래스 바꾸기
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- 무손실 사운드 합성기 (Web Audio API) ---
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSynthSound(type, freqStart, freqEnd, duration, volVal = 0.1) {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freqStart, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(freqEnd, audioCtx.currentTime + duration);
+                
+                gain.gain.setValueAtTime(volVal, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        const SOUNDS = {
+            shoot: () => playSynthSound('triangle', 350, 1100, 0.15, 0.15),
+            bigShoot: () => playSynthSound('sine', 100, 800, 0.45, 0.3),
+            hit: () => playSynthSound('sawtooth', 180, 60, 0.2, 0.25),
+            stun: () => {
+                playSynthSound('square', 600, 400, 0.1, 0.15);
+                setTimeout(() => playSynthSound('square', 600, 400, 0.1, 0.15), 100);
+            },
+            iceSpike: () => {
+                playSynthSound('triangle', 150, 600, 0.3, 0.15);
+                setTimeout(() => playSynthSound('sine', 400, 1200, 0.15, 0.1), 100);
+            },
+            win: () => {
+                playSynthSound('square', 440, 880, 0.1, 0.1);
+                setTimeout(() => playSynthSound('square', 554, 1109, 0.1, 0.1), 100);
+                setTimeout(() => playSynthSound('square', 659, 1318, 0.15, 0.1), 200);
+            }
+        };
+
+        // --- 게임 밸런스 설정 ---
+        let baseMaxHP = 100;
+        let isPaused = false;
+        let gameState = 'LOBBY';
+
+        const CLASS_DATA = {
+            FIRE: {
+                name: "불꽃 마법사",
+                desc: "피해량이 우수하며, 적중 시 적에게 2.5초 동안 도트 화염 피해(초당 4)를 유발합니다.",
+                color: "#ef4444",
+                blastSpeed: 10,
+                baseDamage: 11,
+                sizeMultiplier: 1.25,
+                hpMultiplier: 1.0
+            },
+            ICE: {
+                name: "얼음 마법사",
+                desc: "지상에서 시전 시 상대 발밑에서 얼음 가시를 솟구치게 하고, 체력이 40% 추가 증가합니다.",
+                color: "#38bdf8",
+                blastSpeed: 11,
+                baseDamage: 10,
+                sizeMultiplier: 1.0,
+                hpMultiplier: 1.4
+            },
+            LIGHTNING: {
+                name: "번개 마법사",
+                desc: "적중 성공 시 상대를 0.6초 동안 마법 기절 상태로 만들어 무력화시킵니다.",
+                color: "#facc15",
+                blastSpeed: 13,
+                baseDamage: 7,
+                sizeMultiplier: 0.85,
+                hpMultiplier: 1.0
+            }
+        };
+
+        let p1Class = 'FIRE';
+        let p2Class = 'LIGHTNING';
+
+        // 16:9 가로형 아레나 월드 스케일
+        const world = {
+            width: 960,
+            height: 540,
+            groundY: 440 // 바닥면 기준점
+        };
+
+        const keys = {};
+
+        // 플레이어 캐릭터 데이터 구조
+        const p1 = {
+            id: 1,
+            x: 150,             // 왼쪽 시작
+            y: world.groundY,
+            radius: 28,
+            speed: 5.5,
+            hp: 100,
+            maxHP: 100,
+            class: 'FIRE',
+            color: '#3b82f6',
+            dir: 1,             // 쳐다보는 방향 (1: 오른쪽, -1: 왼쪽)
+            
+            // 점프 물리 엔진 변수
+            z: 0,               // 공중 높이
+            vz: 0,              // 점프 탄력 속도
+            isJumping: false,
+            
+            // 공격 제어 및 재장전 게이지
+            shootCooldown: 0,
+            maxCooldown: 1,     
+            attackKeyPressed: false,
+
+            // 상태이상 제어 타이머
+            stunTimer: 0,       
+            stunImmunityTimer: 0, 
+            burnTimer: 0,       
+            burnTickTimer: 0    
+        };
+
+        const p2 = {
+            id: 2,
+            x: 810,             // 오른쪽 시작
+            y: world.groundY,
+            radius: 28,
+            speed: 5.5,
+            hp: 100,
+            maxHP: 100,
+            class: 'LIGHTNING',
+            color: '#ef4444',
+            dir: -1,            // 왼쪽을 쳐다봄
+            
+            // 점프 물리 엔진 변수
+            z: 0,               
+            vz: 0,              
+            isJumping: false,
+            
+            // 공격 제어 및 재장전 게이지
+            shootCooldown: 0,
+            maxCooldown: 1,
+            attackKeyPressed: false,
+
+            // 상태이상 제어 타이머
+            stunTimer: 0,
+            stunImmunityTimer: 0, 
+            burnTimer: 0,
+            burnTickTimer: 0
+        };
+
+        // 점프 물리 수치
+        const GRAVITY = 0.8;
+        const JUMP_FORCE = 15;
+
+        let blasts = [];
+        let particles = [];
+        let iceSpikes = []; // ❄️ 얼음 마법사의 땅에서 솟구치는 가시들을 관리하는 배열
+
+        // --- 리사이즈 설정 ---
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            let width = container.clientWidth;
+            let height = container.clientWidth * (9 / 16);
+
+            if (height > container.clientHeight) {
+                height = container.clientHeight;
+                width = container.clientHeight * (16 / 9);
+            }
+
+            canvas.style.width = `${width}px`;
+            canvas.style.height = `${height}px`;
+            canvas.width = world.width;
+            canvas.height = world.height;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // --- 키보드 입력 핸들러 ---
+        window.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            keys[key] = true;
+            if (['w', 'a', 's', 'd', 'i', 'j', 'k', 'l'].includes(key)) {
+                e.preventDefault();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            const key = e.key.toLowerCase();
+            keys[key] = false;
+        });
+
+        // --- 클래스 선택기 ---
+        function selectClass(playerNum, className) {
+            initAudio();
+            if (playerNum === 1) {
+                p1Class = className;
+                const data = CLASS_DATA[className];
+                document.getElementById('p1-char-name').innerText = `${data.name}`;
+                document.getElementById('p1-char-desc').innerText = `이동: [A, D] | 점프: [W] | 공격/공중공격: [S] 키`;
+                
+                ['FIRE', 'ICE', 'LIGHTNING'].forEach(c => {
+                    document.getElementById(`p1-btn-${c}`).className = `char-card p-2 rounded-xl bg-slate-950 border text-xs font-bold ${c === className ? 'border-blue-500 text-blue-400 bg-blue-950/20' : 'border-slate-800 text-slate-500'}`;
+                });
+            } else {
+                p2Class = className;
+                const data = CLASS_DATA[className];
+                document.getElementById('p2-char-name').innerText = `${data.name}`;
+                document.getElementById('p2-char-desc').innerText = `이동: [J, L] | 점프: [I] | 공격/공중공격: [K] 키`;
+
+                ['FIRE', 'ICE', 'LIGHTNING'].forEach(c => {
+                    document.getElementById(`p2-btn-${c}`).className = `char-card p-2 rounded-xl bg-slate-950 border text-xs font-bold ${c === className ? 'border-red-500 text-red-400 bg-red-950/20' : 'border-slate-800 text-slate-500'}`;
+                });
+            }
+        }
+
+        function setTargetHP(val) {
+            baseMaxHP = val;
+            [100, 150, 200].forEach(hp => {
+                const btn = document.getElementById(`hp-btn-${hp}`);
+                if (hp === val) {
+                    btn.className = "px-3 py-1.5 rounded-lg bg-indigo-600 text-xs font-bold";
+                } else {
+                    btn.className = "px-3 py-1.5 rounded-lg bg-slate-800 text-xs hover:bg-slate-700";
+                }
+            });
+        }
+
+        // --- 경기 시작 및 리셋 ---
+        function startGame() {
+            initAudio();
+            document.getElementById('lobby-screen').classList.add('hidden');
+            document.getElementById('end-screen').classList.add('hidden');
+            
+            // Player 1 세팅 (왼쪽)
+            p1.class = p1Class;
+            p1.color = CLASS_DATA[p1Class].color;
+            p1.maxHP = baseMaxHP * CLASS_DATA[p1Class].hpMultiplier;
+            p1.hp = p1.maxHP;
+            p1.z = 0; p1.vz = 0; p1.isJumping = false;
+            p1.shootCooldown = 0;
+            p1.maxCooldown = 1;
+            p1.attackKeyPressed = false;
+            p1.stunTimer = 0;
+            p1.stunImmunityTimer = 0;
+            p1.burnTimer = 0;
+            p1.burnTickTimer = 0;
+            p1.dir = 1;
+            
+            // Player 2 세팅 (오른쪽)
+            p2.class = p2Class;
+            p2.color = CLASS_DATA[p2Class].color;
+            p2.maxHP = baseMaxHP * CLASS_DATA[p2Class].hpMultiplier;
+            p2.hp = p2.maxHP;
+            p2.z = 0; p2.vz = 0; p2.isJumping = false;
+            p2.shootCooldown = 0;
+            p2.maxCooldown = 1;
+            p2.attackKeyPressed = false;
+            p2.stunTimer = 0;
+            p2.stunImmunityTimer = 0;
+            p2.burnTimer = 0;
+            p2.burnTickTimer = 0;
+            p2.dir = -1;
+
+            document.getElementById('p1-panel-class').innerHTML = `P1 BLUE (${CLASS_DATA[p1.class].name})`;
+            document.getElementById('p2-panel-class').innerHTML = `P2 RED (${CLASS_DATA[p2.class].name})`;
+
+            blasts = [];
+            particles = [];
+            iceSpikes = [];
+
+            p1.x = 150; p1.y = world.groundY;
+            p2.x = 810; p2.y = world.groundY;
+
+            updateHPBars();
+            
+            gameState = 'PLAYING';
+            isPaused = false;
+            document.getElementById('pause-icon').className = "fa-solid fa-pause";
+            requestAnimationFrame(gameLoop);
+        }
+
+        function restartGame() {
+            startGame();
+        }
+
+        function exitToLobby() {
+            document.getElementById('pause-screen').classList.add('hidden');
+            document.getElementById('end-screen').classList.add('hidden');
+            document.getElementById('lobby-screen').classList.remove('hidden');
+            gameState = 'LOBBY';
+        }
+
+        function togglePause() {
+            if (gameState !== 'PLAYING') return;
+            isPaused = !isPaused;
+            const pauseScreen = document.getElementById('pause-screen');
+            const pauseIcon = document.getElementById('pause-icon');
+            
+            if (isPaused) {
+                pauseScreen.classList.remove('hidden');
+                pauseIcon.className = "fa-solid fa-play text-amber-500";
+            } else {
+                pauseScreen.classList.add('hidden');
+                pauseIcon.className = "fa-solid fa-pause";
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        function updateHPBars() {
+            const p1Percent = Math.max(0, (p1.hp / p1.maxHP) * 100);
+            const p2Percent = Math.max(0, (p2.hp / p2.maxHP) * 100);
+            
+            document.getElementById('p1-hp-bar').style.width = `${p1Percent}%`;
+            document.getElementById('p1-hp-text').innerText = `${Math.ceil(p1.hp)}/${p1.maxHP}`;
+            document.getElementById('p2-hp-bar').style.width = `${p2Percent}%`;
+            document.getElementById('p2-hp-text').innerText = `${Math.ceil(p2.hp)}/${p2.maxHP}`;
+        }
+
+        function createExplosion(x, y, color, count = 15) {
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 1 + Math.random() * 5;
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    radius: 2 + Math.random() * 4,
+                    color: color,
+                    alpha: 1,
+                    decay: 0.02 + Math.random() * 0.03
+                });
+            }
+        }
+
+        // --- 장풍 및 얼음 가시 발사 메커니즘 ---
+        function triggerBlast(player) {
+            if (player.shootCooldown > 0 || player.stunTimer > 0) return; 
+
+            const data = CLASS_DATA[player.class];
+            
+            // 점프 상태(공중)에서 쐈는지 여부 확인
+            const isAerial = player.isJumping && player.z > 5;
+            
+            // 타겟 설정
+            const target = player.id === 1 ? p2 : p1;
+
+            if (player.class === 'ICE' && !isAerial) {
+                // ❄️ 얼음 마법사의 특수 지상 공격: 상대방 발밑에서 솟구치는 얼음 가시 소환!
+                const spikeX = target.x; // 타겟의 실시간 X 좌표를 추적하여 발밑 지정
+                
+                iceSpikes.push({
+                    x: spikeX,
+                    y: world.groundY + player.radius, // 바닥선 아래에서부터 솟구치기 시작
+                    targetHeight: 65,                 // 얼음 가시의 최종 높이
+                    height: 0,                        // 현재 솟구친 높이
+                    state: 'PREPARE',                 // PREPARE(마법진 대기), SURGE(솟구침), DECAY(녹음)
+                    timer: 400,                       // 단계별 타이머 (ms)
+                    damage: data.baseDamage * 1.1,    
+                    ownerId: player.id,
+                    hasDamaged: false                 // 중복 피격 방지용
+                });
+
+                SOUNDS.iceSpike();
+                
+                // 재장전 대기시간 세팅 (지상 얼음 가시는 재사용 대기시간이 조금 김)
+                player.shootCooldown = 55;
+                player.maxCooldown = 55;
+                return;
+            }
+
+            // 일반 장풍 메커니즘 (불꽃, 번개 및 얼음의 공중 공격)
+            let radius, speedX, damage, isUnavoidable, blastZ;
+            
+            if (isAerial) {
+                // 공중 장풍: 머리 위 높이 수평 발사
+                radius = 28 * data.sizeMultiplier; 
+                speedX = data.blastSpeed * 0.85 * player.dir; 
+                damage = data.baseDamage * 1.5; 
+                isUnavoidable = true; 
+                blastZ = Math.max(55, player.z); 
+                
+                SOUNDS.bigShoot();
+                createExplosion(player.x, world.groundY - player.z - 12, '#ffffff', 8);
+                
+                // ⏳ 재장전 속도 대폭 조절 (80프레임)
+                player.shootCooldown = 80;
+                player.maxCooldown = 80;
+            } else {
+                // 지상 장풍: 바닥 수평 슬라이딩
+                radius = 11 * data.sizeMultiplier;
+                speedX = data.blastSpeed * player.dir;
+                damage = data.baseDamage;
+                isUnavoidable = false;
+                blastZ = 0; 
+                SOUNDS.shoot();
+                
+                // ⏳ 재장전 속도 대폭 조절 (50프레임)
+                player.shootCooldown = 50;
+                player.maxCooldown = 50;
+            }
+
+            blasts.push({
+                x: player.x + (player.radius + radius) * player.dir,
+                y: world.groundY - blastZ - 12, 
+                vx: speedX,
+                vy: 0, 
+                z: blastZ, 
+                radius: radius,
+                damage: damage,
+                color: isAerial ? '#a855f7' : player.color, 
+                ownerId: player.id,
+                isUnavoidable: isUnavoidable, 
+                class: player.class // ★버그 수정: 지상 장풍에서도 마법사 클래스 정보를 명확히 기록함!
+            });
+        }
+
+        // --- 플레이어 기절, 면역 및 상태이상 디버프 업데이트 ---
+        function updateStatusEffects(player, dt) {
+            if (player.stunTimer > 0) {
+                player.stunTimer -= dt;
+                if (player.stunTimer <= 0) {
+                    player.stunTimer = 0;
+                    player.stunImmunityTimer = 2500;
+                }
+            }
+
+            if (player.stunImmunityTimer > 0) {
+                player.stunImmunityTimer -= dt;
+                if (player.stunImmunityTimer < 0) player.stunImmunityTimer = 0;
+            }
+
+            if (player.burnTimer > 0) {
+                player.burnTimer -= dt;
+                player.burnTickTimer += dt;
+                
+                if (player.burnTickTimer >= 500) {
+                    player.hp -= 2;
+                    player.burnTickTimer = 0;
+                    SOUNDS.hit();
+                    createExplosion(player.x, player.y - player.z - 10, '#ef4444', 4);
+                    updateHPBars();
+                    checkGameOver();
+                }
+
+                if (player.burnTimer <= 0) {
+                    player.burnTimer = 0;
+                    player.burnTickTimer = 0;
+                }
+            }
+        }
+
+        // --- 1대1 물리 엔진 및 얼음가시 업데이트 ---
+        function updatePhysics() {
+            if (gameState !== 'PLAYING' || isPaused) return;
+
+            const dt = 1000 / 60; 
+            
+            updateStatusEffects(p1, dt);
+            updateStatusEffects(p2, dt);
+
+            const p1Speed = p1.class === 'LIGHTNING' ? p1.speed * 1.25 : p1.speed;
+            const p2Speed = p2.class === 'LIGHTNING' ? p2.speed * 1.25 : p2.speed;
+
+            // 서로를 마주 보게 방향성 갱신
+            if (p1.stunTimer <= 0 && p2.stunTimer <= 0) {
+                p1.dir = p1.x < p2.x ? 1 : -1;
+                p2.dir = p2.x < p1.x ? 1 : -1;
+            }
+
+            // --- 1. 플레이어 1 조작 (왼쪽 BLUE) ---
+            if (p1.stunTimer <= 0) {
+                if (keys['a'] || keys['ㅁ']) { p1.x -= p1Speed; }
+                if (keys['d'] || keys['ㅇ']) { p1.x += p1Speed; }
+                
+                // 점프 조작 (W)
+                if ((keys['w'] || keys['ㅈ']) && !p1.isJumping) {
+                    p1.vz = JUMP_FORCE;
+                    p1.isJumping = true;
+                }
+
+                // 공격 조작 (S)
+                if (keys['s'] || keys['ㄴ']) {
+                    if (!p1.attackKeyPressed) {
+                        triggerBlast(p1);
+                        p1.attackKeyPressed = true;
+                    }
+                } else {
+                    p1.attackKeyPressed = false;
+                }
+            } else {
+                p1.attackKeyPressed = false;
+            }
+
+            // --- 2. 플레이어 2 조작 (오른쪽 RED) ---
+            if (p2.stunTimer <= 0) {
+                if (keys['j'] || keys['ㅓ']) { p2.x -= p2Speed; }
+                if (keys['l'] || keys['ㅣ']) { p2.x += p2Speed; }
+                
+                // 점프 조작 (I)
+                if ((keys['i'] || keys['ㅑ']) && !p2.isJumping) {
+                    p2.vz = JUMP_FORCE;
+                    p2.isJumping = true;
+                }
+
+                // 공격 조작 (K)
+                if (keys['k'] || keys['ㅏ']) {
+                    if (!p2.attackKeyPressed) {
+                        triggerBlast(p2);
+                        p2.attackKeyPressed = true;
+                    }
+                } else {
+                    p2.attackKeyPressed = false;
+                }
+            } else {
+                p2.attackKeyPressed = false;
+            }
+
+            // --- 3. 공중 점프 물리 계산 ---
+            if (p1.isJumping) {
+                p1.z += p1.vz;
+                p1.vz -= GRAVITY;
+                if (p1.z <= 0) {
+                    p1.z = 0;
+                    p1.vz = 0;
+                    p1.isJumping = false;
+                }
+            }
+            if (p2.isJumping) {
+                p2.z += p2.vz;
+                p2.vz -= GRAVITY;
+                if (p2.z <= 0) {
+                    p2.z = 0;
+                    p2.vz = 0;
+                    p2.isJumping = false;
+                }
+            }
+
+            // 쿨타임 감산
+            if (p1.shootCooldown > 0) p1.shootCooldown--;
+            if (p2.shootCooldown > 0) p2.shootCooldown--;
+
+            // 화면 이탈 방지
+            p1.x = Math.max(p1.radius, Math.min(world.width - p1.radius, p1.x));
+            p2.x = Math.max(p2.radius, Math.min(world.width - p2.radius, p2.x));
+
+            // 두 마법사가 겹치지 않게 조절
+            const distBetween = Math.abs(p1.x - p2.x);
+            if (distBetween < p1.radius + p2.radius - 8 && p1.z === 0 && p2.z === 0) {
+                if (p1.x < p2.x) {
+                    p1.x -= 2; p2.x += 2;
+                } else {
+                    p1.x += 2; p2.x -= 2;
+                }
+            }
+
+            // --- 4. ❄️ 얼음 가시(Ice Spikes) 상태기 및 피격 물리 엔진 ---
+            for (let i = iceSpikes.length - 1; i >= 0; i--) {
+                const s = iceSpikes[i];
+                s.timer -= dt;
+
+                if (s.state === 'PREPARE') {
+                    if (s.timer <= 0) {
+                        s.state = 'SURGE';
+                        s.timer = 150; 
+                    }
+                } else if (s.state === 'SURGE') {
+                    s.height += (s.targetHeight - s.height) * 0.45;
+                    
+                    const target = s.ownerId === 1 ? p2 : p1;
+                    const isTargetJumpingSafe = target.isJumping && target.z > 22; 
+                    
+                    if (!isTargetJumpingSafe && !s.hasDamaged) {
+                        const distToSpikeX = Math.abs(target.x - s.x);
+                        if (distToSpikeX < target.radius + 15) {
+                            target.hp -= s.damage;
+                            s.hasDamaged = true;
+                            createExplosion(target.x, world.groundY, '#38bdf8', 18);
+                            SOUNDS.hit();
+                            shakeScreen(12);
+                            updateHPBars();
+                            checkGameOver();
+                        }
+                    }
+
+                    if (s.timer <= 0) {
+                        s.state = 'DECAY';
+                        s.timer = 300; 
+                    }
+                } else if (s.state === 'DECAY') {
+                    s.height *= 0.8; 
+                    if (s.timer <= 0) {
+                        iceSpikes.splice(i, 1);
+                        continue;
+                    }
+                }
+            }
+
+            // --- 5. 수평 장풍 물리 충돌 (X축 및 Z축 높이 판정) ---
+            for (let i = blasts.length - 1; i >= 0; i--) {
+                const b = blasts[i];
+                b.x += b.vx;
+
+                // 영역 이탈시 소멸
+                if (b.x < -50 || b.x > world.width + 50) {
+                    blasts.splice(i, 1);
+                    continue;
+                }
+
+                const target = b.ownerId === 1 ? p2 : p1;
+                
+                // [고도 충돌 판정]
+                const dx = b.x - target.x;
+                const dz = b.z - target.z;
+                const distToTarget = Math.hypot(dx, dz);
+
+                // 두 캐릭터의 반경 및 충격 판정
+                if (distToTarget < b.radius + target.radius) {
+                    target.hp -= b.damage;
+                    createExplosion(b.x, world.groundY - b.z - 12, b.color, 15);
+                    
+                    // 속성 효과 적용
+                    if (b.class === 'LIGHTNING') {
+                        // ⚡ 전기 효과 정상 적용 보장
+                        if (target.stunImmunityTimer <= 0) {
+                            target.stunTimer = 600; 
+                            SOUNDS.stun();
+                            createExplosion(target.x, world.groundY - target.z - 10, '#eab308', 20);
+                        } else {
+                            SOUNDS.hit();
+                            createExplosion(target.x, world.groundY - target.z - 10, '#facc15', 8);
+                        }
+                    } else if (b.class === 'FIRE') {
+                        target.burnTimer = 2500; 
+                        target.burnTickTimer = 0; 
+                        SOUNDS.hit();
+                        createExplosion(target.x, world.groundY - target.z - 10, '#f97316', 15);
+                    } else {
+                        SOUNDS.hit();
+                        createExplosion(target.x, world.groundY - target.z - 10, '#38bdf8', 15);
+                    }
+                    
+                    shakeScreen(10); 
+                    blasts.splice(i, 1);
+                    updateHPBars();
+                    checkGameOver();
+                    continue;
+                }
+            }
+
+            // 6. 이펙트 파티클 움직임
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= p.decay;
+                if (p.alpha <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+
+        // --- 화면 쉐이크 효과 ---
+        let shakeTime = 0;
+        function shakeScreen(amount) {
+            shakeTime = amount;
+        }
+
+        // --- 게임오버 판단 ---
+        function checkGameOver() {
+            if (p1.hp <= 0 || p2.hp <= 0) {
+                gameState = 'FINISHED';
+                SOUNDS.win();
+
+                const endScreen = document.getElementById('end-screen');
+                const winnerTitle = document.getElementById('winner-title');
+                const winnerDesc = document.getElementById('winner-desc');
+                const winnerIcon = document.getElementById('winner-icon');
+                const endModal = document.getElementById('end-modal');
+
+                document.getElementById('final-p1-score').innerText = p1.hp <= 0 ? 0 : Math.ceil(p1.hp);
+                document.getElementById('final-p2-score').innerText = p2.hp <= 0 ? 0 : Math.ceil(p2.hp);
+
+                if (p1.hp <= 0 && p2.hp <= 0) {
+                    winnerTitle.innerText = "무승부! (DRAW)";
+                    winnerTitle.className = "text-3xl font-black mb-1 text-purple-500";
+                    winnerDesc.innerText = "서로의 장풍이 교차하며 폭발적인 동시에 결투가 끝났습니다!";
+                    winnerIcon.innerHTML = "🤝";
+                    endModal.className = "max-w-sm w-full bg-slate-900 border-4 border-purple-500 rounded-3xl p-8 text-center shadow-2xl";
+                } else if (p1.hp <= 0) {
+                    winnerTitle.innerText = "RED WINNER!";
+                    winnerTitle.className = "text-3xl font-black mb-1 text-red-500 neon-glow-red";
+                    winnerDesc.innerText = `플레이어 2 RED (${CLASS_DATA[p2.class].name})의 대승리!`;
+                    winnerIcon.innerHTML = "🧙‍♂️🏆";
+                    endModal.className = "max-w-sm w-full bg-slate-900 border-4 border-red-500 rounded-3xl p-8 text-center shadow-2xl neon-glow-red";
+                } else {
+                    winnerTitle.innerText = "BLUE WINNER!";
+                    winnerTitle.className = "text-3xl font-black mb-1 text-blue-500 neon-glow-blue";
+                    winnerDesc.innerText = `플레이어 1 BLUE (${CLASS_DATA[p1.class].name})의 대승리!`;
+                    winnerIcon.innerHTML = "🧙‍♂️🏆";
+                    endModal.className = "max-w-sm w-full bg-slate-900 border-4 border-blue-500 rounded-3xl p-8 text-center shadow-2xl neon-glow-blue";
+                }
+
+                endScreen.classList.remove('hidden');
+            }
+        }
+
+        // --- 실시간 렌더링 뷰포트 ---
+        function drawArena() {
+            ctx.save();
+            
+            if (shakeTime > 0) {
+                const dx = (Math.random() - 0.5) * shakeTime;
+                const dy = (Math.random() - 0.5) * shakeTime;
+                ctx.translate(dx, dy);
+                shakeTime *= 0.9;
+                if (shakeTime < 0.2) shakeTime = 0;
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. 바닥(지하 지평선) 네온 그리기
+            ctx.lineWidth = 6;
+            ctx.strokeStyle = '#334155';
+            ctx.beginPath();
+            ctx.moveTo(0, world.groundY + p1.radius);
+            ctx.lineTo(world.width, world.groundY + p1.radius);
+            ctx.stroke();
+
+            // 중앙 격자 데코 선
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'rgba(139, 92, 246, 0.12)';
+            ctx.beginPath();
+            ctx.setLineDash([8, 8]);
+            ctx.moveTo(world.width / 2, 0);
+            ctx.lineTo(world.width / 2, world.height);
+            ctx.stroke();
+            ctx.setLineDash([]); 
+
+            // ❄️ 2. 얼음 가시(Ice Spikes) 및 소환 마법진 렌더링
+            iceSpikes.forEach(s => {
+                ctx.save();
+                if (s.state === 'PREPARE') {
+                    // 소환 예고 마법진 연출
+                    ctx.shadowColor = '#38bdf8';
+                    ctx.shadowBlur = 10;
+                    ctx.strokeStyle = 'rgba(56, 189, 248, 0.8)';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    // 타겟 발밑 가로 타격 영역 표시
+                    ctx.ellipse(s.x, world.groundY + p1.radius - 2, 35, 8, 0, 0, Math.PI * 2);
+                    ctx.stroke();
+                } else {
+                    // 고체 네온 얼음 가시 솟구침 드로잉
+                    ctx.shadowColor = '#38bdf8';
+                    ctx.shadowBlur = s.height / 3;
+                    ctx.fillStyle = 'rgba(56, 189, 248, 0.85)';
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 2.5;
+
+                    // 넓은 얼음 기둥과 세부 뾰족가시 형태 드로잉
+                    ctx.beginPath();
+                    ctx.moveTo(s.x - 25, world.groundY + p1.radius);
+                    ctx.lineTo(s.x, world.groundY + p1.radius - s.height); // 얼음 중앙 피크
+                    ctx.lineTo(s.x + 25, world.groundY + p1.radius);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 서브 작은 사이드 얼음 돌출 가시
+                    ctx.beginPath();
+                    ctx.moveTo(s.x - 40, world.groundY + p1.radius);
+                    ctx.lineTo(s.x - 20, world.groundY + p1.radius - s.height * 0.55);
+                    ctx.lineTo(s.x + 40, world.groundY + p1.radius); // 수평선 끝선 보정
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.moveTo(s.x, world.groundY + p1.radius);
+                    ctx.lineTo(s.x + 20, world.groundY + p1.radius - s.height * 0.55);
+                    ctx.lineTo(s.x + 40, world.groundY + p1.radius);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                }
+                ctx.restore();
+            });
+
+            // 3. 장풍(Blasts) 그리기
+            blasts.forEach(b => {
+                ctx.save();
+                
+                ctx.shadowColor = b.color;
+                ctx.shadowBlur = b.isUnavoidable ? b.radius * 1.5 : b.radius * 1.1;
+                ctx.fillStyle = b.color;
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 장풍 코어 하이라이트
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = b.isUnavoidable ? '#fef08a' : '#ffffff'; 
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.radius * 0.45, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+
+            // 4. 파티클 이펙트 그리기
+            particles.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+
+            // 5. 플레이어 캐릭터(마법사 비주얼) 그리기
+            drawPlayer(p1);
+            drawPlayer(p2);
+
+            ctx.restore();
+        }
+
+        // --- 마법사 캐릭터 정교한 캔버스 드로잉 함수 ---
+        function drawPlayer(player) {
+            ctx.save();
+            const isP1 = player.id === 1;
+
+            // 점프 및 충전 흔들림 반영 위치 계산
+            let posX = player.x;
+            let posY = player.y - player.z;
+
+            // 그림자 렌더링 (공중에 높게 떴을 때)
+            if (player.z > 0) {
+                const shadowRadius = Math.max(6, player.radius * (1 - player.z / 250));
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.beginPath();
+                ctx.ellipse(player.x, player.y + player.radius - 2, shadowRadius, shadowRadius * 0.3, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // 캐릭터 네온 광선 섀도우 효과 설정
+            ctx.shadowColor = player.stunTimer > 0 ? '#eab308' : player.color;
+            ctx.shadowBlur = 15;
+
+            // --- 마법사 몸체 겉옷(Robe) 드로잉 ---
+            ctx.fillStyle = player.stunTimer > 0 ? '#78716c' : player.color;
+            ctx.beginPath();
+            ctx.moveTo(posX, posY - player.radius);
+            ctx.lineTo(posX - player.radius, posY + player.radius);
+            ctx.lineTo(posX + player.radius, posY + player.radius);
+            ctx.closePath();
+            ctx.fill();
+
+            // --- 신비로운 마법 마스크/얼굴 영역 ---
+            ctx.shadowBlur = 0; 
+            ctx.fillStyle = '#1e293b'; 
+            ctx.beginPath();
+            ctx.arc(posX, posY - 4, player.radius * 0.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // --- 마법사 눈빛 드로잉 ---
+            ctx.fillStyle = player.stunTimer > 0 ? '#eab308' : '#ffffff';
+            const eyeOffsetX = 5 * player.dir;
+            const eyeSpacing = 6;
+            ctx.beginPath();
+            ctx.arc(posX + eyeOffsetX - eyeSpacing, posY - 5, 2.5, 0, Math.PI * 2);
+            ctx.arc(posX + eyeOffsetX + eyeSpacing, posY - 5, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // --- 정교한 마법사 꼬깔 모자(Wizard Hat) 드로잉 ---
+            ctx.save();
+            ctx.translate(posX, posY - player.radius * 0.5);
+            const tilt = -0.08 * player.dir * (player.isJumping ? 1.5 : 1);
+            ctx.rotate(tilt);
+            
+            ctx.fillStyle = player.stunTimer > 0 ? '#57534e' : '#1e1b4b'; 
+            ctx.strokeStyle = player.stunTimer > 0 ? '#a8a29e' : player.color;
+            ctx.lineWidth = 3;
+
+            // 모자 챙
+            ctx.beginPath();
+            ctx.ellipse(0, 0, player.radius * 1.1, player.radius * 0.25, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // 모자 본체
+            ctx.fillStyle = player.stunTimer > 0 ? '#44403c' : '#312e81';
+            ctx.beginPath();
+            ctx.moveTo(-player.radius * 0.6, -3);
+            ctx.bezierCurveTo(-player.radius * 0.4, -player.radius * 1.5, -player.radius * 0.2, -player.radius * 2.1, -player.radius * 0.4, -player.radius * 2.3); 
+            ctx.lineTo(player.radius * 0.3, -3);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+
+            // --- 기절 면역(Stun Immunity) 상태 아우라링 🛡️ ---
+            if (player.stunImmunityTimer > 0 && player.stunTimer <= 0) {
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+                ctx.lineWidth = 3.5;
+                ctx.beginPath();
+                ctx.arc(posX, posY, player.radius + 14, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            // --- 공격 쿨타임(재장전) 링 렌더링 ⏳ ---
+            if (player.shootCooldown > 0 && player.stunTimer <= 0) {
+                const cooldownProgress = player.shootCooldown / player.maxCooldown;
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.lineWidth = 3.5;
+                ctx.beginPath();
+                // 캐릭터 테두리 링에 게이지 시각화
+                ctx.arc(posX, posY, player.radius + 8, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * (1 - cooldownProgress)));
+                ctx.stroke();
+            }
+
+            // --- 기절(Stun) 상태 렌더링 ---
+            if (player.stunTimer > 0) {
+                ctx.strokeStyle = '#facc15';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.arc(posX, posY - player.radius * 1.4, 16, Math.random() * Math.PI, Math.random() * Math.PI + 1.2);
+                ctx.stroke();
+
+                ctx.fillStyle = '#facc15';
+                ctx.font = '10px font-orbitron';
+                ctx.fillText("⚡ STUN ⚡", posX - 24, posY - player.radius * 1.4 - 24);
+            }
+
+            // --- 화염(Burn) 상태 렌더링 ---
+            if (player.burnTimer > 0) {
+                ctx.fillStyle = '#f97316';
+                ctx.font = '10px font-orbitron';
+                ctx.fillText("🔥 BURN 🔥", posX - 24, posY - player.radius * 1.4 - 24);
+            }
+
+            // 점프 링 데코 (쿨타임 중이 아닐 때만 겹치지 않게 우선 노출)
+            if (player.z > 0 && player.stunTimer <= 0 && player.shootCooldown <= 0) {
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(posX, posY, player.radius + 6, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        // --- 메인 프레임 루프 ---
+        function gameLoop() {
+            if (gameState === 'PLAYING' && !isPaused) {
+                updatePhysics();
+                drawArena();
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+    </script>
+</body>
+</html>
